@@ -78,6 +78,54 @@
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
             }
+        },
+        {
+            "name": "release_fast_linux",
+            "displayName": "Linux (Release Fast, Stripped)",
+            "description": "GCC/Clang max optimization, LTO, stripped symbols, no asserts.",
+            "inherits": [
+                "linux"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+                "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-s",
+                "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "-s"
+            }
+        },
+        {
+            "name": "release_fast_macos_universal",
+            "displayName": "macOS Universal (Release Fast, Stripped)",
+            "description": "Clang max optimization, LTO, stripped symbols, no asserts. Keeps universal-binary arch/triplet from macos_universal.",
+            "inherits": [
+                "macos_universal"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+                "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-Wl,-S",
+                "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "-Wl,-S"
+            }
+        },
+        {
+            "name": "release_fast_windows_msvc",
+            "displayName": "Windows MSVC (Release Fast, Stripped)",
+            "description": "MSVC max optimization, whole-program LTCG, no PDBs/asserts.",
+            "inherits": [
+                "windows_msvc"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+                "CMAKE_C_FLAGS_RELEASE": "/O2 /GL /DNDEBUG",
+                "CMAKE_CXX_FLAGS_RELEASE": "/O2 /GL /DNDEBUG",
+                "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/LTCG /DEBUG:NONE",
+                "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "/LTCG /DEBUG:NONE"
+            }
         }
     ],
     "buildPresets": [
@@ -128,6 +176,39 @@
                 "rhs": "Windows"
             },
             "configurePreset": "windows_msvc"
+        },
+        {
+            "name": "release_fast_linux",
+            "displayName": "Linux (Release Fast, Stripped)",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "configurePreset": "release_fast_linux",
+            "configuration": "Release"
+        },
+        {
+            "name": "release_fast_macos_universal",
+            "displayName": "macOS Universal (Release Fast, Stripped)",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "configurePreset": "release_fast_macos_universal",
+            "configuration": "Release"
+        },
+        {
+            "name": "release_fast_windows_msvc",
+            "displayName": "Windows MSVC (Release Fast, Stripped)",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "configurePreset": "release_fast_windows_msvc",
+            "configuration": "Release"
         }
     ],
     "testPresets": [
