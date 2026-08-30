@@ -292,6 +292,45 @@
                 "rhs": "Windows"
             },
             "configurePreset": "windows_msvc"
+        },
+        {
+            "name": "release_fast_linux",
+            "displayName": "Linux (Release Fast, Stripped)",
+            "inherits": [
+                "base"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "configurePreset": "release_fast_linux"
+        },
+        {
+            "name": "release_fast_macos_universal",
+            "displayName": "macOS Universal (Release Fast, Stripped)",
+            "inherits": [
+                "base"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "configurePreset": "release_fast_macos_universal"
+        },
+        {
+            "name": "release_fast_windows_msvc",
+            "displayName": "Windows MSVC (Release Fast, Stripped)",
+            "inherits": [
+                "base"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "configurePreset": "release_fast_windows_msvc"
         }
     ]
 }
