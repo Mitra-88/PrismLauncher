@@ -97,26 +97,27 @@ void ModrinthCreationTask::executeTask()
         parseManifest(oldIndexPath, oldFiles, false, false);
 
         // Let's remove all duplicated, identical resources!
-        auto filesIterator = m_files.begin();
-    begin:
-        while (filesIterator != m_files.end()) {
+        for (auto filesIterator = m_files.begin(); filesIterator != m_files.end();) {
             const auto& file = *filesIterator;
+            bool erased = false;
 
-            auto oldFilesIterator = oldFiles.begin();
-            while (oldFilesIterator != oldFiles.end()) {
+            for (auto oldFilesIterator = oldFiles.begin(); oldFilesIterator != oldFiles.end();) {
                 const auto& oldFile = *oldFilesIterator;
 
                 if (oldFile.hash == file.hash) {
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
                     filesIterator = m_files.erase(filesIterator);
                     oldFilesIterator = oldFiles.erase(oldFilesIterator);
-                    goto begin;  // Sorry :c
+                    erased = true;
+                    break;
                 }
 
-                oldFilesIterator++;
+                ++oldFilesIterator;
             }
 
-            filesIterator++;
+            if (!erased) {
+                ++filesIterator;
+            }
         }
 
         QDir oldMinecraftDir(inst->gameRoot());
@@ -282,7 +283,7 @@ void ModrinthCreationTask::createInstance()
                                         .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
-        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
+        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::Request::Option::NoOptions, meta);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
         if (!file.downloads.empty()) {
@@ -291,7 +292,7 @@ void ModrinthCreationTask::createInstance()
             auto param = dl.toWeakRef();
             connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
-                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
+                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::Request::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
                 if (auto shared = param.lock()) {
@@ -442,7 +443,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 
 void ModrinthCreationTask::ensureMetaLoop()
 {
-    const QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    const QDir folder = FS::PathCombine(m_newInstance->modsRoot(), ".index");
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(m_resources, folder, ModPlatform::ResourceProvider::MODRINTH);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);
