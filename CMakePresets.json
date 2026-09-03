@@ -82,15 +82,15 @@
         {
             "name": "release_fast_linux",
             "displayName": "Linux (Release Fast, Stripped)",
-            "description": "GCC/Clang max optimization, LTO, stripped symbols, no asserts.",
+            "description": "GCC/Clang max optimization, LTO, stripped symbols, no asserts. Targets x86-64-v3 (AVX2-class CPUs, ~2015+)",
             "inherits": [
                 "linux"
             ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
-                "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
-                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
+                "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG -march=x86-64-v3 -fomit-frame-pointer -fno-plt -fvisibility=hidden -fmerge-all-constants",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -march=x86-64-v3 -fomit-frame-pointer -fno-plt -fvisibility=hidden -fmerge-all-constants",
                 "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-s",
                 "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "-s"
             }
@@ -105,8 +105,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
-                "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
-                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer",
+                "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer -fvisibility=hidden -fmerge-all-constants",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -fomit-frame-pointer -fvisibility=hidden -fmerge-all-constants",
                 "CMAKE_EXE_LINKER_FLAGS_RELEASE": "-Wl,-S",
                 "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "-Wl,-S"
             }
@@ -114,15 +114,15 @@
         {
             "name": "release_fast_windows_msvc",
             "displayName": "Windows MSVC (Release Fast, Stripped)",
-            "description": "MSVC max optimization, whole-program LTCG, no PDBs/asserts.",
+            "description": "MSVC max optimization, whole-program LTCG, no PDBs/asserts. /arch:AVX2 is MSVC's equivalent to x86-64-v3",
             "inherits": [
                 "windows_msvc"
             ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
-                "CMAKE_C_FLAGS_RELEASE": "/O2 /GL /DNDEBUG",
-                "CMAKE_CXX_FLAGS_RELEASE": "/O2 /GL /DNDEBUG",
+                "CMAKE_C_FLAGS_RELEASE": "/O2 /GL /DNDEBUG /Gw /Oi /arch:AVX2",
+                "CMAKE_CXX_FLAGS_RELEASE": "/O2 /GL /DNDEBUG /Gw /Oi /arch:AVX2",
                 "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/LTCG /DEBUG:NONE",
                 "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "/LTCG /DEBUG:NONE"
             }

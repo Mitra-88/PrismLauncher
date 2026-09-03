@@ -145,9 +145,3 @@ runs:
       with:
         name: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage
         path: PrismLauncher-${{ runner.os }}-*${{ env.APPIMAGE_ARCH }}.AppImage
-
-    - name: Upload AppImage Zsync
-      uses: actions/upload-artifact@v7
-      with:
-        name: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage.zsync
-        path: PrismLauncher-${{ runner.os }}-*${{ env.APPIMAGE_ARCH }}.AppImage.zsync
