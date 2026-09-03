@@ -38,6 +38,8 @@ jobs:
       id-token: write
       # Required for vcpkg binary cache
       packages: write
+      # Required to list/delete older artifacts via the API
+      actions: write
 
     strategy:
       fail-fast: false
@@ -163,3 +165,35 @@ jobs:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      ##
+      # CLEANUP
+      ##
+
+      - name: Expire older artifacts with the same name
+        if: ${{ always() }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NAME_PREFIX: ${{ env.ARTIFACT_NAME }}
+        run: |
+          # List every artifact whose name starts with this matrix leg's
+          # artifact name (e.g. "Linux-Qt6"), oldest first is not guaranteed
+          # by the API so we sort by created_at ourselves, then delete every
+          # one of them except the most recently created.
+          mapfile -t ids < <(
+            gh api "repos/$REPO/actions/artifacts?per_page=100" --paginate \
+              --jq "[.artifacts[] | select(.name | startswith(\"$NAME_PREFIX\"))] | sort_by(.created_at) | .[:-1] | .[].id"
+          )
+
+          if [ "${#ids[@]}" -eq 0 ]; then
+            echo "No older artifacts named '$NAME_PREFIX*' to expire."
+            exit 0
+          fi
+
+          echo "Expiring ${#ids[@]} older artifact(s) named '$NAME_PREFIX*'..."
+          for id in "${ids[@]}"; do
+            echo "  deleting artifact id $id"
+            gh api --method DELETE "repos/$REPO/actions/artifacts/$id" || true
+          done
