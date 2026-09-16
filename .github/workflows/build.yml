@@ -256,11 +256,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="nightly"
-
           gh release delete "$TAG" --yes --cleanup-tag || true
-
           gh release create "$TAG" release-files/* \
-            --prerelease \
             --title "Nightly (build #${{ github.run_number }}, ${{ steps.sha.outputs.short_sha }})" \
             --notes-file release_notes.md \
             --target "${{ github.sha }}"

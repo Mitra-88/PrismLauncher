@@ -182,5 +182,5 @@ runs:
     - name: Upload installer
       uses: actions/upload-artifact@v7
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}
+        name: PrismLauncher-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}.exe
         path: PrismLauncher-Setup.exe

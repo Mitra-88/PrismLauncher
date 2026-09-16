@@ -137,7 +137,7 @@ runs:
     - name: Upload binary tarball
       uses: actions/upload-artifact@v7
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
+        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}.zip
         path: PrismLauncher.zip
 
     - name: Upload disk image
