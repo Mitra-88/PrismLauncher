@@ -20,7 +20,12 @@ runs:
       uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       with:
         arch: ${{ inputs.vcvars-arch }}
-        vsversion: 2022
+        # no vsversion: the windows-2025 image ships VS2026 only, use its latest VS
+
+    # NSIS is not preinstalled on the windows-2025 image, the installer packaging needs makensis
+    - name: Install NSIS
+      shell: pwsh
+      run: choco install nsis -y --no-progress
 
     - name: Setup Java (MSVC)
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
