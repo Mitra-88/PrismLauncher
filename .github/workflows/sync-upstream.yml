@@ -13,6 +13,8 @@ on:
 permissions:
   contents: write
   issues: write
+  # required to dispatch the nightly build after a successful merge
+  actions: write
 
 env:
   UPSTREAM_REPO: https://github.com/PrismLauncher/PrismLauncher.git
@@ -76,6 +78,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           git push origin develop
+          gh workflow run build.yml --ref develop
           gh issue list --label "$CONFLICT_LABEL" --state open --json number --jq '.[].number' |
             while read -r n; do
               gh issue close "$n" --comment "Upstream was merged cleanly, closing this conflict report."

@@ -2,14 +2,10 @@ name: Build
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Never cancel in-flight nightly (push) or release (workflow_call) builds, only PR/merge-group runs
+  # Never cancel in-flight nightly (dispatched) or release (workflow_call) builds, only PR/merge-group runs
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
 
 on:
-  push:
-    branches:
-      - master
-      - develop
   merge_group:
     types: [checks_requested]
   pull_request:
@@ -37,7 +33,7 @@ jobs:
 
     steps:
       - name: Reset the rolling nightly release
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
           # no checkout in this job, so gh cannot infer the repo from a git remote
@@ -210,7 +206,7 @@ jobs:
       ##
 
       - name: Upload nightly assets
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

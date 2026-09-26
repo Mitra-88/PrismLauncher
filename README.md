@@ -15,7 +15,7 @@
 ## Changes in this fork
 
 - Based on the latest **develop** branch changes, not the stable release.
-- **Automated nightly builds**: every push to develop or master resets a rolling [nightly pre-release](../../releases/tag/nightly), and each platform uploads its own installers, portable builds and checksums as soon as it finishes building, no waiting for the whole matrix.
+- **Nightly builds**: the rolling [nightly pre-release](../../releases/tag/nightly) is rebuilt on demand from the Actions tab, or automatically after each daily upstream merge, with each platform uploading its installers, portable builds and checksums as soon as it finishes building.
 - **Automated daily sync with upstream**: upstream develop is merged automatically and pushed; on conflict the merge is aborted and a tracking issue is opened for a human or an AI agent to fix.
 - **Release builds only**: CI never produces Debug artifacts and never compiles tests.
 - **Three build targets**: Linux x64, Windows MSVC x64 and macOS arm64 (Apple Silicon). MinGW-w64, Windows arm64 and Linux arm64 builds are dropped.
