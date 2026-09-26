@@ -76,8 +76,6 @@ jobs:
             --notes-file release-notes.md
 
   build:
-    name: Build (${{ matrix.artifact-name }})
-
     needs: prepare-nightly
 
     environment: ${{ inputs.environment || '' }}
