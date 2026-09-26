@@ -5,13 +5,10 @@ inputs:
   build-type:
     description: Type for the build
     required: true
-    default: Debug
+    default: Release
   artifact-name:
     description: Name of the uploaded artifact
     required: true
-  msystem:
-    description: MSYS2 subsystem to use
-    required: false
   vcvars-arch:
     description: Visual Studio architecture to use
     required: false
@@ -38,6 +35,22 @@ runs:
       if: ${{ runner.os == 'Linux' }}
       uses: ./.github/actions/setup-dependencies/linux
 
+    # vcpkg builds Linux dependencies from source, cache them with the GitHub Actions cache backend
+    - name: Export GitHub Actions cache environment (Linux vcpkg cache)
+      if: ${{ runner.os == 'Linux' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+    - name: Setup vcpkg cache (Linux)
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: |
+        echo "VCPKG_BINARY_SOURCES=clear;x-gha,readwrite" >> "$GITHUB_ENV"
+
     - name: Setup macOS dependencies
       if: ${{ runner.os == 'macOS' }}
       uses: ./.github/actions/setup-dependencies/macos
@@ -49,27 +62,26 @@ runs:
       uses: ./.github/actions/setup-dependencies/windows
       with:
         build-type: ${{ inputs.build-type }}
-        msystem: ${{ inputs.msystem }}
         vcvars-arch: ${{ inputs.vcvars-arch }}
 
-    # TODO(@getchoo): Get this working on MSYS2!
     - name: Setup ccache
-      if: ${{ (runner.os != 'Windows' || inputs.msystem == '') && inputs.build-type == 'Debug' }}
       uses: hendrikmuhs/ccache-action@v1.2.23
       with:
         variant: sccache
         create-symlink: ${{ runner.os != 'Windows' }}
-        key: ${{ runner.os }}-${{ runner.arch }}-${{ inputs.artifact-name }}-sccache
+        # unique save key per run plus a prefix fallback, so every build adds its
+        # new objects to the cache instead of freezing on the first saved entry
+        append-timestamp: true
+        key: ${{ runner.os }}-${{ runner.arch }}-${{ inputs.artifact-name }}-${{ inputs.build-type }}-sccache
+        restore-keys: |
+          ${{ runner.os }}-${{ runner.arch }}-${{ inputs.artifact-name }}-${{ inputs.build-type }}-sccache
+        max-size: 1G
 
-    - name: Use ccache on debug builds
-      if: ${{ inputs.build-type == 'Debug' }}
+    - name: Use ccache
       shell: bash
-      env:
-        # Only use ccache on MSYS2
-        CCACHE_VARIANT: ${{ (runner.os == 'Windows' && inputs.msystem != '') && 'ccache' || 'sccache' }}
       run: |
-        echo "CMAKE_C_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
-        echo "CMAKE_CXX_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
+        echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> "$GITHUB_ENV"
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> "$GITHUB_ENV"
 
     - name: Determine vcpkg triplet
       shell: bash
@@ -94,15 +106,10 @@ runs:
         	vcpkg_platform=linux
         	;;
         "macOS")
-        	vcpkg_arch=universal
         	vcpkg_platform=osx
         	;;
         "Windows")
-        	if [[ "${{ inputs.msystem }}" != "" ]]; then
-        		vcpkg_platform=mingw-static-release
-        	else
-        		vcpkg_platform=windows
-        	fi
+        	vcpkg_platform=windows
         	;;
         *)
         	echo "# 🚨 The platform \"$platform\" is not supported by vcpkg in CI!" >>"$GITHUB_STEP_SUMMARY"
@@ -112,9 +119,8 @@ runs:
 
         echo "VCPKG_TRIPLET=$vcpkg_arch-$vcpkg_platform" >> "$GITHUB_ENV"
 
-  # old python versions detect 7z files as zip, breaking aqtinstall. see https://github.com/miurahr/aqtinstall/issues/1042
+    # old python versions detect 7z files as zip, breaking aqtinstall. see https://github.com/miurahr/aqtinstall/issues/1042
     - name: Update Python
-      if: ${{ inputs.msystem == '' }}
       uses: actions/setup-python@v7
       with:
         python-version: '3.14'
@@ -126,8 +132,7 @@ runs:
         setup-python: false
         aqtsource: git+https://github.com/miurahr/aqtinstall.git@16db45a70b5905ad596941b223469bc86a56901e
         modules: qtimageformats qtnetworkauth
-        cache: ${{ inputs.build-type == 'Debug' }}
-        arch: ${{ inputs.msystem != '' && 'win64_llvm_mingw' || '' }}
+        cache: true
 
     - name: Set Qt6_DIR
       shell: bash

@@ -48,14 +48,29 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
         # /Gw helps reduce binary size
         # /Gy allows the compiler to package individual functions
         # /guard:cf enables control flow guard
-        "$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/Gw;/Gy;/guard:cf>"
+        # /Zc:inline removes unreferenced functions and data, helping reduce binary size
+        "$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/Gw;/Gy;/guard:cf;/Zc:inline>"
+
+        # /fp:fast uses faster, less strictly IEEE 754 compliant floating point math
+        # /Ob3 enables more aggressive, cross-function inlining alongside /GL
+        "$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/fp:fast;/Ob3>"
     )
+
+    # Target x86-64-v3 era CPUs: MSVC has no exact v3 flag, /arch:AVX2 is its closest switch
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|x86_64)$")
+        add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:/arch:AVX2>")
+    endif()
 
     add_link_options(
         # /LTCG allows for linking wholy optimizated programs
         # /MANIFEST:NO disables generating a manifest file, we instead provide our own
+        # /OPT:REF removes functions and data that are never referenced
+        # /OPT:ICF folds identical COMDAT sections, helping reduce binary size
         # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
-        "$<$<COMPILE_LANGUAGE:C,CXX>:/LTCG;/MANIFEST:NO;/STACK:8388608>"
+        "$<$<COMPILE_LANGUAGE:C,CXX>:/LTCG;/MANIFEST:NO;/OPT:REF;/OPT:ICF;/STACK:8388608>"
+
+        # /GUARD:CF marks the final binary as supporting control flow guard, pairing with /guard:cf
+        "$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/GUARD:CF>"
     )
 
     # /GL enables whole program optimizations
@@ -79,21 +94,52 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 else()
     add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-fstack-protector-strong;--param=ssp-buffer-size=4>")
 
+    # Hide all symbols that are not explicitly marked for export, shrinking binaries and speeding up load times
+    add_compile_options(
+        "$<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>"
+        "$<$<COMPILE_LANGUAGE:C,CXX>:-fvisibility=hidden>"
+    )
+
+    # Target x86-64-v3 (Haswell/Excavator 2013 and newer); excluded on Apple, where CI builds arm64 only
+    if(NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|x86_64)$")
+        add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-march=x86-64-v3>")
+    endif()
+
+    # -ffast-math trades strict IEEE 754 compliance for faster floating point math
+    # NOTE: -fno-finite-math-only keeps NaN/Inf checks like qIsNaN working correctly
+    add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-ffast-math;-fno-finite-math-only>")
+
     # Avoid re-defining _FORTIFY_SOURCE, as it can cause redefinition errors in setups that use it by default (i.e., package builds)
     if(NOT (CMAKE_C_FLAGS MATCHES "-D_FORTIFY_SOURCE" OR CMAKE_CXX_FLAGS MATCHES "-D_FORTIFY_SOURCE"))
         # NOTE: _FORTIFY_SOURCE requires optimizations in most newer versions of glibc
         add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<CONFIG:Release,RelWithDebInfo>>:-D_FORTIFY_SOURCE=2>")
     endif()
 
-    # ATL's pack list needs more than the default 1 Mib stack on windows
+    # -ffunction-sections and -fdata-sections let the linker remove unused code and data, helping reduce binary size
+    add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-ffunction-sections;-fdata-sections>")
+
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        # ATL's pack list needs more than the default 1 Mib stack on windows
         add_link_options("$<$<COMPILE_LANGUAGE:C,CXX>:-Wl,--stack,8388608>")
 
-        # -ffunction-sections and -fdata-sections help reduce binary size
         # -mguard=cf enables Control Flow Guard
-        # TODO: Look into -gc-sections to further reduce binary size
-        add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-ffunction-sections;-fdata-sections;-mguard=cf>")
+        add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-mguard=cf>")
+
+        # --gc-sections removes the unused code and data placed into separate sections above
+        add_link_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>>:-Wl,--gc-sections>")
+    elseif(APPLE)
+        # -dead_strip removes the unused code and data placed into separate sections above
+        add_link_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>>:-Wl,-dead_strip>")
+    else()
+        # -fno-plt avoids PLT indirection for external function calls
+        add_compile_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:-fno-plt>")
+
+        # --gc-sections removes the unused code and data placed into separate sections above
+        add_link_options("$<$<AND:$<CONFIG:Release,RelWithDebInfo>>:-Wl,--gc-sections>")
     endif()
+
+    # Strip symbols from Release binaries, as they are not shipped; RelWithDebInfo builds keep them
+    add_link_options("$<$<CONFIG:Release>:-s>")
 endif()
 
 # Export compile commands for debug builds if we can (useful in LSPs like clangd)

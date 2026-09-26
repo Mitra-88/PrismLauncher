@@ -1,0 +1,122 @@
+name: Sync with upstream
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+on:
+  schedule:
+    # daily at 03:00 UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  UPSTREAM_REPO: https://github.com/PrismLauncher/PrismLauncher.git
+  UPSTREAM_BRANCH: develop
+  CONFLICT_LABEL: upstream-sync-conflict
+
+jobs:
+  sync:
+    name: Merge upstream into develop
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v7
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream "$UPSTREAM_REPO"
+          git fetch upstream "$UPSTREAM_BRANCH"
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          count="$(git rev-list --count "HEAD..upstream/$UPSTREAM_BRANCH")"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Upstream is $count commits ahead"
+
+      - name: Merge upstream
+        id: merge
+        if: steps.check.outputs.count != '0'
+        run: |
+          upstream_sha="$(git rev-parse --short "upstream/$UPSTREAM_BRANCH")"
+          echo "upstream_sha=$upstream_sha" >> "$GITHUB_OUTPUT"
+
+          if git merge --no-edit "upstream/$UPSTREAM_BRANCH" -m "chore: merge upstream develop ($upstream_sha)"; then
+            echo "conflict=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "conflict=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Conflicting files"
+              git diff --name-only --diff-filter=U
+              echo ""
+              echo "### Upstream commits waiting"
+              git log --oneline "HEAD..upstream/$UPSTREAM_BRANCH" | head -20
+            } > conflict-report.md
+            cat conflict-report.md
+            git merge --abort
+          fi
+
+      - name: Push merge and close resolved reports
+        if: steps.merge.outputs.conflict == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git push origin develop
+          gh issue list --label "$CONFLICT_LABEL" --state open --json number --jq '.[].number' |
+            while read -r n; do
+              gh issue close "$n" --comment "Upstream was merged cleanly, closing this conflict report."
+            done
+
+      - name: Report conflict
+        if: steps.merge.outputs.conflict == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create "$CONFLICT_LABEL" \
+            --color E99695 \
+            --description "Upstream sync hit merge conflicts" \
+            --force
+
+          {
+            echo "**Automated upstream sync hit merge conflicts. The merge was aborted, nothing was pushed.**"
+            echo ""
+            echo "* Upstream: \`PrismLauncher/PrismLauncher@$UPSTREAM_BRANCH\` at \`${{ steps.merge.outputs.upstream_sha }}\`"
+            echo "* Local \`develop\`: \`$(git rev-parse --short HEAD)\`"
+            echo "* A human or an AI agent needs to resolve this locally and push the merge."
+            echo ""
+            cat conflict-report.md
+            echo ""
+            echo "### Resolution recipe"
+            echo "1. \`git remote add upstream $UPSTREAM_REPO\` (skip if it already exists)"
+            echo "2. \`git fetch upstream $UPSTREAM_BRANCH\`"
+            echo "3. \`git merge upstream/$UPSTREAM_BRANCH\`"
+            echo "4. Fix the conflicting files listed above, commit, and push to \`develop\`."
+            echo ""
+            echo "This issue stays open until a sync succeeds. Run log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > issue-body.md
+
+          existing="$(gh issue list --label "$CONFLICT_LABEL" --state open --json number --jq '.[0].number')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue-body.md
+          else
+            gh issue create \
+              --label "$CONFLICT_LABEL" \
+              --title "Upstream sync conflict, needs manual merge" \
+              --body-file issue-body.md
+          fi
+
+          exit 1

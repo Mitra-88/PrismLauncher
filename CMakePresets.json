@@ -45,6 +45,16 @@
             }
         },
         {
+            "name": "macos_arm64",
+            "displayName": "macOS (ARM64)",
+            "inherits": [
+                "macos"
+            ],
+            "cacheVariables": {
+                "CMAKE_OSX_ARCHITECTURES": "arm64"
+            }
+        },
+        {
             "name": "macos_universal",
             "displayName": "macOS (Universal Binary)",
             "inherits": [
@@ -100,6 +110,14 @@
                 "rhs": "Darwin"
             },
             "configurePreset": "macos"
+        },
+        {
+            "name": "macos_arm64",
+            "displayName": "macOS (ARM64)",
+            "inherits": [
+                "macos"
+            ],
+            "configurePreset": "macos_arm64"
         },
         {
             "name": "macos_universal",

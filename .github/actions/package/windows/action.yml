@@ -8,13 +8,10 @@ inputs:
   build-type:
     description: Type for the build
     required: true
-    default: Debug
+    default: Release
   artifact-name:
     description: Name of the uploaded artifact
     required: true
-  msystem:
-    description: MSYS2 subsystem to use
-    required: false
   azure-client-id:
     description: Client ID for the Azure Signer Application
     required: true
@@ -29,27 +26,7 @@ runs:
   using: composite
 
   steps:
-      # NOTE: Avoid multiple matches for DLLs with CMake
-      # This will fallback to those provided by the toolchain (i.e., MSYS2, llvm-mingw)
-    - name: Cleanup Qt install (MinGW)
-      if: ${{ inputs.msystem != '' }}
-      shell: msys2 {0}
-      run: |
-        rm -f "$QT_ROOT_DIR"/bin/lib{c++,unwind}.dll
-
-    - name: Package (MinGW)
-      if: ${{ inputs.msystem != '' }}
-      shell: msys2 {0}
-      env:
-        BUILD_DIR: build
-        INSTALL_DIR: install
-      run: |
-        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }}
-        touch ${{ env.INSTALL_DIR }}/manifest.txt
-        for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt
-
-    - name: Package (MSVC)
-      if: ${{ inputs.msystem == '' }}
+    - name: Package
       shell: pwsh
       env:
         BUILD_DIR: build
@@ -90,7 +67,7 @@ runs:
         timestamp-rfc3161: 'http://timestamp.acs.microsoft.com'
         timestamp-digest: 'SHA256'
         # TODO(@getchoo): Is this all really needed???
-        # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a47c7a7c/docs/OIDC.md
+        # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a7c7/docs/OIDC.md
         exclude-environment-credential: true
         exclude-workload-identity-credential: true
         exclude-managed-identity-credential: true
@@ -102,20 +79,7 @@ runs:
         exclude-azure-developer-cli-credential: true
         exclude-interactive-browser-credential: true
 
-    - name: Package (MinGW, portable)
-      if: ${{ inputs.msystem != '' }}
-      shell: msys2 {0}
-      env:
-        BUILD_DIR: build
-        INSTALL_DIR: install
-        INSTALL_PORTABLE_DIR: install-portable
-      run: |
-        cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
-        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-        for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
-
-    - name: Package (MSVC, portable)
-      if: ${{ inputs.msystem == '' }}
+    - name: Package (portable)
       shell: pwsh
       env:
         BUILD_DIR: build
@@ -163,7 +127,7 @@ runs:
         timestamp-rfc3161: 'http://timestamp.acs.microsoft.com'
         timestamp-digest: 'SHA256'
         # TODO(@getchoo): Is this all really needed???
-        # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a47c7a7c/docs/OIDC.md
+        # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a7c7/docs/OIDC.md
         exclude-environment-credential: true
         exclude-workload-identity-credential: true
         exclude-managed-identity-credential: true
