@@ -15,13 +15,15 @@
 ## Changes in this fork
 
 - Based on the latest **develop** branch changes, not the stable release.
-- Release-only CI builds with extra compiler optimization and binary size flags: no Debug builds, no CI test compilation.
-- Linux and Windows builds target **x86-64-v3**, so they need an AVX2-era CPU (roughly 2013 or newer); macOS ships an **arm64** (Apple Silicon) build.
-- Windows builds use MSVC only: MinGW-w64, Windows arm64 and Linux arm64 builds are dropped.
-- Newest stable Qt, currently **6.11.2**, pinned for all platforms in one place.
-- Automated nightly builds: every push to develop or master replaces the rolling nightly pre-release with fresh installers, portable builds and checksums.
-- Automated daily sync with upstream develop: clean merges are pushed automatically, conflicts abort the merge and open a tracking issue for a human or an AI agent to fix.
-- CI caching for compiler output (sccache), vcpkg dependencies and Qt.
+- **Automated nightly builds**: every push to develop or master resets a rolling [nightly pre-release](../../releases/tag/nightly), and each platform uploads its own installers, portable builds and checksums as soon as it finishes building, no waiting for the whole matrix.
+- **Automated daily sync with upstream**: upstream develop is merged automatically and pushed; on conflict the merge is aborted and a tracking issue is opened for a human or an AI agent to fix.
+- **Release builds only**: CI never produces Debug artifacts and never compiles tests.
+- **Three build targets**: Linux x64, Windows MSVC x64 and macOS arm64 (Apple Silicon). MinGW-w64, Windows arm64 and Linux arm64 builds are dropped.
+- **x86-64-v3** on Linux and Windows, so those builds need an AVX2-era CPU (roughly 2013 or newer); macOS ships arm64.
+- **Compiler optimization and binary size flags**: whole program optimization and LTO, aggressive inlining, fast floating point, control flow guard, dead code elimination, hidden symbol visibility and stripped release binaries.
+- **Newest stable Qt**, currently **6.11.2**, pinned once for all platforms.
+- **Modern runner images**: Ubuntu 26.04, Windows Server 2025 with Visual Studio 2026 and macOS 26, with every GitHub Action pinned to an exact commit sha.
+- **CI caching** for compiler output (sccache), vcpkg dependencies and Qt downloads.
 - Trimmed this README down to the essentials.
 
 ## Installation
