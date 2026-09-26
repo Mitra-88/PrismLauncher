@@ -40,6 +40,8 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
+          # no checkout in this job, so gh cannot infer the repo from a git remote
+          GH_REPO: ${{ github.repository }}
         run: |
           short_sha="${GITHUB_SHA::7}"
 
