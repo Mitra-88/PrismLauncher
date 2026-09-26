@@ -22,7 +22,7 @@
 - **x86-64-v3** on Linux and Windows, so those builds need an AVX2-era CPU (roughly 2013 or newer); macOS ships arm64.
 - **Compiler optimization and binary size flags**: whole program optimization and LTO, aggressive inlining, fast floating point, control flow guard, dead code elimination, hidden symbol visibility and stripped release binaries.
 - **Newest stable Qt**, currently **6.11.2**, pinned once for all platforms.
-- **Modern runner images**: Ubuntu 26.04, Windows Server 2025 with Visual Studio 2026 and macOS 26, with every GitHub Action pinned to an exact commit sha.
+- **Runner images**: Ubuntu 24.04, Windows Server 2022 with Visual Studio 2022 and macOS 26, with every GitHub Action pinned to an exact commit sha.
 - **CI caching** for compiler output (sccache), vcpkg dependencies and Qt downloads.
 - Trimmed this README down to the essentials.
 

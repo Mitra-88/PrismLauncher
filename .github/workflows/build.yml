@@ -91,11 +91,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-26.04
+          - os: ubuntu-24.04
             artifact-name: Linux
             cmake-preset: linux
 
-          - os: windows-2025
+          - os: windows-2022
             artifact-name: Windows-MSVC
             cmake-preset: windows_msvc
             vcvars-arch: amd64
