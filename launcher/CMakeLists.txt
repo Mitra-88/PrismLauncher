@@ -1490,6 +1490,10 @@ endif()
 if(WIN32 OR (UNIX AND APPLE))
     if(WIN32)
         set(QT_DEPLOY_TOOL_OPTIONS "--no-opengl-sw --no-quick-import --no-system-d3d-compiler --no-system-dxc-compiler --skip-plugin-types generic,networkinformation")
+    elseif(APPLE)
+        # macdeployqt's signing pass fails on the jars in MacOS/ and exits with errors;
+        # the packaging workflow signs the whole bundle with codesign afterwards, so skip it
+        set(QT_DEPLOY_TOOL_OPTIONS "-no-codesign")
     endif()
 
     qt_generate_deploy_script(

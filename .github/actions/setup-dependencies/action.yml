@@ -38,7 +38,7 @@ runs:
     # vcpkg builds Linux dependencies from source, cache them with the GitHub Actions cache backend
     - name: Export GitHub Actions cache environment (Linux vcpkg cache)
       if: ${{ runner.os == 'Linux' }}
-      uses: actions/github-script@v7
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
@@ -65,7 +65,7 @@ runs:
         vcvars-arch: ${{ inputs.vcvars-arch }}
 
     - name: Setup ccache
-      uses: hendrikmuhs/ccache-action@v1.2.23
+      uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
       with:
         variant: sccache
         create-symlink: ${{ runner.os != 'Windows' }}
@@ -121,12 +121,12 @@ runs:
 
     # old python versions detect 7z files as zip, breaking aqtinstall. see https://github.com/miurahr/aqtinstall/issues/1042
     - name: Update Python
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.14'
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
       with:
         version: ${{ inputs.qt-version }}
         setup-python: false
