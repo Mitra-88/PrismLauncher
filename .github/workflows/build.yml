@@ -143,7 +143,11 @@ jobs:
 
       - name: Configure project
         run: |
-          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" -D BUILD_TESTING=OFF
+          # the debug info format must be a cache variable so it applies to cmake's
+          # compiler test: sccache cannot handle the /Zi PDB the test uses by default
+          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" -D BUILD_TESTING=OFF \
+            -D CMAKE_POLICY_DEFAULT_CMP0141=NEW \
+            -D "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT=$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>"
 
       - name: Run build
         run: |
@@ -229,9 +233,11 @@ jobs:
           esac
 
           cd nightly-assets
+          # bash on macOS is 3.2, ${var,,} is not available there
+          os_name="$(printf '%s' "$RUNNER_OS" | tr '[:upper:]' '[:lower:]')"
           if command -v sha256sum > /dev/null 2>&1; then
-            sha256sum -- * > "SHA256SUMS-${RUNNER_OS,,}.txt"
+            sha256sum -- * > "SHA256SUMS-$os_name.txt"
           else
-            shasum -a 256 -- * > "SHA256SUMS-${RUNNER_OS,,}.txt"
+            shasum -a 256 -- * > "SHA256SUMS-$os_name.txt"
           fi
           gh release upload nightly --clobber --repo "$GITHUB_REPOSITORY" *
