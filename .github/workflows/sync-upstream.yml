@@ -20,6 +20,8 @@ env:
   UPSTREAM_REPO: https://github.com/PrismLauncher/PrismLauncher.git
   UPSTREAM_BRANCH: develop
   CONFLICT_LABEL: upstream-sync-conflict
+  # this checkout has an upstream remote, without GH_REPO gh can pick the wrong repo
+  GH_REPO: ${{ github.repository }}
 
 jobs:
   sync:
