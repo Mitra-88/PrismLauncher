@@ -1,8 +1,0 @@
-2026-10-11T23:23:45.8560000Z Job is waiting for a hosted runner to come online.
-2026-10-11T23:23:45.8560000Z Job is about to start running on the hosted runner: GitHub Actions 1000002625
-2026-10-11T23:23:45.8440000Z Evaluating prepare-nightly.if
-2026-10-11T23:23:45.8440000Z Evaluating: success()
-2026-10-11T23:23:45.8440000Z Result: true
-2026-10-11T23:23:45.8470000Z Requested labels: ubuntu-slim
-2026-10-11T23:23:45.8470000Z Job defined at: Mitra-88/PrismLauncher/.github/workflows/build.yml@refs/heads/develop
-2026-10-11T23:23:45.8470000Z Waiting for a runner to pick up this job...
