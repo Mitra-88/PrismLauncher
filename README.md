@@ -16,6 +16,7 @@
 
 - Based on the latest **develop** branch changes, not the stable release.
 - **Nightly builds**: the rolling [nightly pre-release](../../releases/tag/nightly) is rebuilt on demand from the Actions tab, or automatically after each daily upstream merge, with each platform uploading its installers, portable builds and checksums as soon as it finishes building.
+- **Offline mode without a Microsoft account**: add an offline account with just a username and play, no Microsoft login needed anywhere, including downloading the game files.
 - **Automated daily sync with upstream**: upstream develop is merged automatically and pushed; on conflict the merge is aborted and a tracking issue is opened for a human or an AI agent to fix.
 - **Release builds only**: CI never produces Debug artifacts and never compiles tests.
 - **Three build targets**: Linux x64, Windows MSVC x64 and macOS arm64 (Apple Silicon). MinGW-w64, Windows arm64 and Linux arm64 builds are dropped.

@@ -1,0 +1,66 @@
+﻿2026-10-11T23:23:48.6523850Z Current runner version: '2.337.0'
+2026-10-11T23:23:48.6548676Z ##[group]Runner Image Provisioner
+2026-10-11T23:23:48.6550072Z Hosted Compute Agent
+2026-10-11T23:23:48.6550688Z Version: 20261002.596
+2026-10-11T23:23:48.6551389Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-11T23:23:48.6552105Z Build Date: 2026-10-02T22:28:27Z
+2026-10-11T23:23:48.6552757Z Worker ID: {9fba9035-1da3-430e-9d33-4ff32e6fb715}
+2026-10-11T23:23:48.6553506Z Region: westus3
+2026-10-11T23:23:48.6554060Z Cloud: Azure
+2026-10-11T23:23:48.6554593Z ##[endgroup]
+2026-10-11T23:23:48.6556183Z ##[group]VM Image
+2026-10-11T23:23:48.6556766Z - OS: Linux (x64)
+2026-10-11T23:23:48.6557406Z - Source: Docker
+2026-10-11T23:23:48.6557953Z - Name: ubuntu:24.04
+2026-10-11T23:23:48.6558537Z - Version: 20261005.17.1
+2026-10-11T23:23:48.6559113Z ##[endgroup]
+2026-10-11T23:23:48.6560572Z ##[group]GITHUB_TOKEN Permissions
+2026-10-11T23:23:48.6562454Z Contents: write
+2026-10-11T23:23:48.6563052Z Metadata: read
+2026-10-11T23:23:48.6563830Z ##[endgroup]
+2026-10-11T23:23:48.6565985Z Secret source: Actions
+2026-10-11T23:23:48.6566965Z Cache mode: write
+2026-10-11T23:23:48.6567662Z Prepare workflow directory
+2026-10-11T23:23:48.7113025Z Prepare all required actions
+2026-10-11T23:23:48.7230008Z Complete job name: Prepare nightly release
+2026-10-11T23:23:48.8485582Z ##[group]Run short_sha="${GITHUB_SHA::7}"
+2026-10-11T23:23:48.8486451Z [36;1mshort_sha="${GITHUB_SHA::7}"[0m
+2026-10-11T23:23:48.8487310Z [36;1m[0m
+2026-10-11T23:23:48.8488321Z [36;1mprev_target="$(gh release view nightly --json targetCommitish --jq .targetCommitish 2>/dev/null || true)"[0m
+2026-10-11T23:23:48.8489370Z [36;1m{[0m
+2026-10-11T23:23:48.8500627Z [36;1m  echo "**Automated Nightly Build**"[0m
+2026-10-11T23:23:48.8501368Z [36;1m  echo "* **Build:** #23"[0m
+2026-10-11T23:23:48.8502132Z [36;1m  echo "* **Branch:** \`${GITHUB_REF_NAME}\`"[0m
+2026-10-11T23:23:48.8503373Z [36;1m  echo "* **Commit:** [\`${short_sha}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})"[0m
+2026-10-11T23:23:48.8504463Z [36;1m  echo "* **Started:** $(date -u +'%Y-%m-%d %H:%M UTC')"[0m
+2026-10-11T23:23:48.8505266Z [36;1m  echo ""[0m
+2026-10-11T23:23:48.8506043Z [36;1m  echo "Assets are uploaded here as each platform finishes building."[0m
+2026-10-11T23:23:48.8506976Z [36;1m} > release-notes.md[0m
+2026-10-11T23:23:48.8507589Z [36;1m[0m
+2026-10-11T23:23:48.8508311Z [36;1mif [ -n "$prev_target" ] && [ "$prev_target" != "$GITHUB_SHA" ]; then[0m
+2026-10-11T23:23:48.8509438Z [36;1m  changelog="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${prev_target}...${GITHUB_SHA}" \[0m
+2026-10-11T23:23:48.8521411Z [36;1m    --jq '.commits[] | "* " + (.commit.message | split("\n")[0]) + " (`" + .sha[0:7] + "`")' 2>/dev/null | head -20 || true)"[0m
+2026-10-11T23:23:48.8522481Z [36;1m  if [ -n "$changelog" ]; then[0m
+2026-10-11T23:23:48.8523111Z [36;1m    {[0m
+2026-10-11T23:23:48.8523679Z [36;1m      echo ""[0m
+2026-10-11T23:23:48.8524283Z [36;1m      echo "## Recent changes"[0m
+2026-10-11T23:23:48.8524973Z [36;1m      echo "$changelog"[0m
+2026-10-11T23:23:48.8525602Z [36;1m    } >> release-notes.md[0m
+2026-10-11T23:23:48.8526194Z [36;1m  fi[0m
+2026-10-11T23:23:48.8526752Z [36;1mfi[0m
+2026-10-11T23:23:48.8527235Z [36;1m[0m
+2026-10-11T23:23:48.8527900Z [36;1mgh release delete nightly --yes --cleanup-tag || true[0m
+2026-10-11T23:23:48.8528716Z [36;1mgh release create nightly \[0m
+2026-10-11T23:23:48.8529468Z [36;1m  --prerelease \[0m
+2026-10-11T23:23:48.8540630Z [36;1m  --target "$GITHUB_SHA" \[0m
+2026-10-11T23:23:48.8541388Z [36;1m  --title "Nightly (build #23, ${short_sha})" \[0m
+2026-10-11T23:23:48.8542231Z [36;1m  --notes-file release-notes.md[0m
+2026-10-11T23:23:48.9506169Z shell: /usr/bin/bash -e {0}
+2026-10-11T23:23:48.9507153Z env:
+2026-10-11T23:23:48.9507660Z   QT_VERSION: 6.11.2
+2026-10-11T23:23:48.9508285Z   BUILD_TYPE: Release
+2026-10-11T23:23:48.9512584Z   GH_TOKEN: ***
+2026-10-11T23:23:48.9513232Z   GH_REPO: Mitra-88/PrismLauncher
+2026-10-11T23:23:48.9514118Z ##[endgroup]
+2026-10-11T23:23:52.7809973Z https://github.com/Mitra-88/PrismLauncher/releases/tag/nightly
+2026-10-11T23:23:52.7998025Z Cleaning up orphan processes

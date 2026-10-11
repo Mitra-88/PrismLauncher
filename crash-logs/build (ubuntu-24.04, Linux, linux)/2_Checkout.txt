@@ -1,0 +1,137 @@
+﻿2026-10-11T23:23:58.5973644Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-10-11T23:23:58.5974481Z with:
+2026-10-11T23:23:58.5974826Z   submodules: true
+2026-10-11T23:23:58.5975201Z   repository: Mitra-88/PrismLauncher
+2026-10-11T23:23:58.5978335Z   token: ***
+2026-10-11T23:23:58.5978692Z   ssh-strict: true
+2026-10-11T23:23:58.5979050Z   ssh-user: git
+2026-10-11T23:23:58.5979405Z   persist-credentials: true
+2026-10-11T23:23:58.5979788Z   clean: true
+2026-10-11T23:23:58.5980142Z   sparse-checkout-cone-mode: true
+2026-10-11T23:23:58.5980551Z   fetch-depth: 1
+2026-10-11T23:23:58.5980890Z   fetch-tags: false
+2026-10-11T23:23:58.5981245Z   show-progress: true
+2026-10-11T23:23:58.5981597Z   lfs: false
+2026-10-11T23:23:58.5981937Z   set-safe-directory: true
+2026-10-11T23:23:58.5982336Z   allow-unsafe-pr-checkout: false
+2026-10-11T23:23:58.5982898Z env:
+2026-10-11T23:23:58.5983214Z   QT_VERSION: 6.11.2
+2026-10-11T23:23:58.5983567Z   BUILD_TYPE: Release
+2026-10-11T23:23:58.5983929Z   ARTIFACT_NAME: Linux-Qt6
+2026-10-11T23:23:58.5984349Z   BUILD_PLATFORM: official
+2026-10-11T23:23:58.5984722Z   CMAKE_PRESET: linux
+2026-10-11T23:23:58.5985086Z   MACOSX_DEPLOYMENT_TARGET: 
+2026-10-11T23:23:58.5985618Z ##[endgroup]
+2026-10-11T23:23:58.6780167Z Syncing repository: Mitra-88/PrismLauncher
+2026-10-11T23:23:58.6782146Z ##[group]Getting Git version info
+2026-10-11T23:23:58.6782900Z Working directory is '/home/runner/work/PrismLauncher/PrismLauncher'
+2026-10-11T23:23:58.6784138Z [command]/usr/bin/git version
+2026-10-11T23:23:58.6840293Z git version 2.55.0
+2026-10-11T23:23:58.6858149Z ##[endgroup]
+2026-10-11T23:23:58.6867990Z Temporarily overriding HOME='/home/runner/work/_temp/a3e54431-cc0d-4de4-a613-5c267dce1368' before making global git config changes
+2026-10-11T23:23:58.6869644Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-11T23:23:58.6873343Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/PrismLauncher/PrismLauncher
+2026-10-11T23:23:58.6919537Z Deleting the contents of '/home/runner/work/PrismLauncher/PrismLauncher'
+2026-10-11T23:23:58.6921536Z ##[group]Determining repository object format
+2026-10-11T23:23:58.6922811Z ##[endgroup]
+2026-10-11T23:23:58.6923659Z ##[group]Initializing the repository
+2026-10-11T23:23:58.6926485Z [command]/usr/bin/git init /home/runner/work/PrismLauncher/PrismLauncher
+2026-10-11T23:23:58.6998184Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-11T23:23:58.6999523Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-11T23:23:58.7000696Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-11T23:23:58.7001607Z hint: call:
+2026-10-11T23:23:58.7002102Z hint:
+2026-10-11T23:23:58.7002704Z hint: 	git config --global init.defaultBranch <name>
+2026-10-11T23:23:58.7003459Z hint:
+2026-10-11T23:23:58.7004168Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-11T23:23:58.7005311Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-11T23:23:58.7006468Z hint:
+2026-10-11T23:23:58.7006988Z hint: 	git branch -m <name>
+2026-10-11T23:23:58.7007570Z hint:
+2026-10-11T23:23:58.7008341Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-11T23:23:58.7009638Z Initialized empty Git repository in /home/runner/work/PrismLauncher/PrismLauncher/.git/
+2026-10-11T23:23:58.7026964Z [command]/usr/bin/git remote add origin https://github.com/Mitra-88/PrismLauncher
+2026-10-11T23:23:58.7062340Z ##[endgroup]
+2026-10-11T23:23:58.7063107Z ##[group]Disabling automatic garbage collection
+2026-10-11T23:23:58.7065144Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-11T23:23:58.7093402Z ##[endgroup]
+2026-10-11T23:23:58.7094195Z ##[group]Setting up auth
+2026-10-11T23:23:58.7094840Z Removing SSH command configuration
+2026-10-11T23:23:58.7099488Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-11T23:23:58.7129555Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-11T23:23:58.7409428Z Removing HTTP extra header
+2026-10-11T23:23:58.7414399Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-11T23:23:58.7448635Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-11T23:23:58.7643049Z Removing includeIf entries pointing to credentials config files
+2026-10-11T23:23:58.7647519Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-11T23:23:58.7679270Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-11T23:23:58.7870681Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-11T23:23:58.7906250Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/PrismLauncher/PrismLauncher/.git.path /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:23:58.7936091Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/PrismLauncher/PrismLauncher/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:23:58.7967397Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:23:58.7998008Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:23:58.8025503Z ##[endgroup]
+2026-10-11T23:23:58.8026117Z ##[group]Fetching the repository
+2026-10-11T23:23:58.8030843Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d3bf8e63e38a4a11d16892bd307f24f6fb4bcce9:refs/remotes/origin/develop
+2026-10-11T23:24:00.3934927Z From https://github.com/Mitra-88/PrismLauncher
+2026-10-11T23:24:00.3936633Z  * [new ref]         d3bf8e63e38a4a11d16892bd307f24f6fb4bcce9 -> origin/develop
+2026-10-11T23:24:00.3943013Z [command]/usr/bin/git branch --list --remote origin/develop
+2026-10-11T23:24:00.3970413Z   origin/develop
+2026-10-11T23:24:00.3975911Z [command]/usr/bin/git rev-parse refs/remotes/origin/develop
+2026-10-11T23:24:00.4000385Z d3bf8e63e38a4a11d16892bd307f24f6fb4bcce9
+2026-10-11T23:24:00.4004227Z ##[endgroup]
+2026-10-11T23:24:00.4005172Z ##[group]Determining the checkout info
+2026-10-11T23:24:00.4006538Z ##[endgroup]
+2026-10-11T23:24:00.4009468Z [command]/usr/bin/git sparse-checkout disable
+2026-10-11T23:24:00.4058180Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-11T23:24:00.4346430Z ##[group]Checking out the ref
+2026-10-11T23:24:00.4350432Z [command]/usr/bin/git checkout --progress --force -B develop refs/remotes/origin/develop
+2026-10-11T23:24:00.5214237Z Switched to a new branch 'develop'
+2026-10-11T23:24:00.5221449Z branch 'develop' set up to track 'origin/develop'.
+2026-10-11T23:24:00.5227009Z ##[endgroup]
+2026-10-11T23:24:00.5228577Z ##[group]Setting up auth for fetching submodules
+2026-10-11T23:24:00.5232387Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-11T23:24:00.5272260Z [command]/usr/bin/git config --global include.path /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:24:00.5302936Z [command]/usr/bin/git config --global --unset-all url.https://github.com/.insteadOf
+2026-10-11T23:24:00.5337307Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf git@github.com:
+2026-10-11T23:24:00.5377172Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf org-120065660@github.com:
+2026-10-11T23:24:00.5401078Z ##[endgroup]
+2026-10-11T23:24:00.5402966Z ##[group]Fetching submodules
+2026-10-11T23:24:00.5404105Z [command]/usr/bin/git submodule sync
+2026-10-11T23:24:00.5604620Z [command]/usr/bin/git -c protocol.version=2 submodule update --init --force --depth=1
+2026-10-11T23:24:00.5811375Z Submodule 'cmake/vcpkg' (https://github.com/microsoft/vcpkg.git) registered for path 'cmake/vcpkg'
+2026-10-11T23:24:00.5816773Z Submodule 'libraries/libnbtplusplus' (https://github.com/PrismLauncher/libnbtplusplus.git) registered for path 'libraries/libnbtplusplus'
+2026-10-11T23:24:00.5839882Z Cloning into '/home/runner/work/PrismLauncher/PrismLauncher/cmake/vcpkg'...
+2026-10-11T23:24:01.9763265Z Cloning into '/home/runner/work/PrismLauncher/PrismLauncher/libraries/libnbtplusplus'...
+2026-10-11T23:24:04.8242345Z From https://github.com/microsoft/vcpkg
+2026-10-11T23:24:04.8243015Z  * branch              908da3a305a0a8028d9602ab241b433652b3df69 -> FETCH_HEAD
+2026-10-11T23:24:05.3798748Z Submodule path 'cmake/vcpkg': checked out '908da3a305a0a8028d9602ab241b433652b3df69'
+2026-10-11T23:24:06.2904943Z From https://github.com/PrismLauncher/libnbtplusplus
+2026-10-11T23:24:06.2905678Z  * branch            3538933614059f0f44388a2b16f3db25ce42285b -> FETCH_HEAD
+2026-10-11T23:24:06.2981977Z Submodule path 'libraries/libnbtplusplus': checked out '3538933614059f0f44388a2b16f3db25ce42285b'
+2026-10-11T23:24:06.2993513Z [command]/usr/bin/git submodule foreach git config --local gc.auto 0
+2026-10-11T23:24:06.3187309Z Entering 'cmake/vcpkg'
+2026-10-11T23:24:06.3213080Z Entering 'libraries/libnbtplusplus'
+2026-10-11T23:24:06.3257167Z ##[endgroup]
+2026-10-11T23:24:06.3258121Z ##[group]Persisting credentials for submodules
+2026-10-11T23:24:06.3278073Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'url\.https\:\/\/github\.com\/\.insteadOf' && git config --local --unset-all 'url.https://github.com/.insteadOf' || :"
+2026-10-11T23:24:06.3449100Z Entering 'cmake/vcpkg'
+2026-10-11T23:24:06.3503591Z Entering 'libraries/libnbtplusplus'
+2026-10-11T23:24:06.3552497Z [command]/usr/bin/git submodule foreach git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-11T23:24:06.3740794Z Entering 'cmake/vcpkg'
+2026-10-11T23:24:06.3758047Z file:/home/runner/work/PrismLauncher/PrismLauncher/.git/modules/cmake/vcpkg/config	remote.origin.url
+2026-10-11T23:24:06.3760465Z Entering 'libraries/libnbtplusplus'
+2026-10-11T23:24:06.3777477Z file:/home/runner/work/PrismLauncher/PrismLauncher/.git/modules/libraries/libnbtplusplus/config	remote.origin.url
+2026-10-11T23:24:06.3790984Z [command]/usr/bin/git config --file /home/runner/work/PrismLauncher/PrismLauncher/.git/modules/cmake/vcpkg/config includeIf.gitdir:/home/runner/work/PrismLauncher/PrismLauncher/.git/modules/cmake/vcpkg.path /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:24:06.3826658Z [command]/usr/bin/git config --file /home/runner/work/PrismLauncher/PrismLauncher/.git/modules/cmake/vcpkg/config includeIf.gitdir:/github/workspace/.git/modules/cmake/vcpkg.path /github/runner_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:24:06.3861058Z [command]/usr/bin/git config --file /home/runner/work/PrismLauncher/PrismLauncher/.git/modules/libraries/libnbtplusplus/config includeIf.gitdir:/home/runner/work/PrismLauncher/PrismLauncher/.git/modules/libraries/libnbtplusplus.path /home/runner/work/_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:24:06.3893104Z [command]/usr/bin/git config --file /home/runner/work/PrismLauncher/PrismLauncher/.git/modules/libraries/libnbtplusplus/config includeIf.gitdir:/github/workspace/.git/modules/libraries/libnbtplusplus.path /github/runner_temp/git-credentials-b83ea372-42fb-484b-a86f-38ba48d7854f.config
+2026-10-11T23:24:06.3924181Z [command]/usr/bin/git submodule foreach git config --local --add 'url.https://github.com/.insteadOf' 'git@github.com:'
+2026-10-11T23:24:06.4114644Z Entering 'cmake/vcpkg'
+2026-10-11T23:24:06.4136465Z Entering 'libraries/libnbtplusplus'
+2026-10-11T23:24:06.4168379Z [command]/usr/bin/git submodule foreach git config --local --add 'url.https://github.com/.insteadOf' 'org-120065660@github.com:'
+2026-10-11T23:24:06.4360163Z Entering 'cmake/vcpkg'
+2026-10-11T23:24:06.4388278Z Entering 'libraries/libnbtplusplus'
+2026-10-11T23:24:06.4426940Z ##[endgroup]
+2026-10-11T23:24:06.4464591Z [command]/usr/bin/git log -1 --format=%H
+2026-10-11T23:24:06.4491727Z d3bf8e63e38a4a11d16892bd307f24f6fb4bcce9
