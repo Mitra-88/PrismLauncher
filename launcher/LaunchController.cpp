@@ -93,7 +93,7 @@ void LaunchController::decideAccount()
         m_accountToUse = accounts->at(instanceAccountIndex);
     }
 
-    if (!accounts->anyAccountIsValid()) {
+    if (accounts->count() == 0) {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
                                                   tr("In order to play Minecraft, you must have at least one Microsoft "
@@ -111,7 +111,7 @@ void LaunchController::decideAccount()
         }
     }
 
-    if (!m_accountToUse && accounts->anyAccountIsValid()) {
+    if (!m_accountToUse && accounts->count() > 0) {
         // If no default account is set, ask the user which one to use.
         ProfileSelectDialog selectDialog(tr("Which account would you like to use?"), ProfileSelectDialog::GlobalDefaultCheckbox,
                                          m_parentWidget);
@@ -152,7 +152,9 @@ LaunchDecision LaunchController::decideLaunchMode()
     }
 
     if (!accountToCheck) {
-        m_actualLaunchMode = LaunchMode::Demo;
+        // an explicitly offline account plays offline even without any Microsoft
+        // account backing it up; anything else has nothing to authenticate with
+        m_actualLaunchMode = m_accountToUse->accountType() == AccountType::Offline ? LaunchMode::Offline : LaunchMode::Demo;
         return LaunchDecision::Continue;
     }
 
