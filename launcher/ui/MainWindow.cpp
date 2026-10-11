@@ -180,6 +180,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, renameButton);
 
         ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
+
+        // make every button stretch to the toolbar width, so the row stays aligned
+        // when the toolbar is moved or resized
+        for (QAction* action : ui->instanceToolBar->actions()) {
+            QWidget* widget = ui->instanceToolBar->widgetForAction(action);
+            if (!widget)
+                continue;
+            widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+            // workaround for breeze and breeze forks
+            widget->setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
+        }
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -271,6 +282,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         newsLabel = new QToolButton();
         newsLabel->setIcon(QIcon::fromTheme("news"));
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        // workaround for breeze and breeze forks
+        newsLabel->setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
         newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         newsLabel->setFocusPolicy(Qt::NoFocus);
         ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
@@ -373,7 +386,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Add "manage accounts" button, right align
     QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->mainToolBar->insertWidget(ui->actionAccountsButton, spacer);
 
     // Use undocumented property... https://stackoverflow.com/questions/7121718/create-a-scrollbar-in-a-submenu-qt

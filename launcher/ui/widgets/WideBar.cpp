@@ -189,8 +189,8 @@ void WideBar::removeAction(QAction* action)
     if (iter == m_entries.end())
         return;
 
-    iter->bar_action->setVisible(false);
-    removeAction(iter->bar_action);
+    // must qualify: the unqualified call resolves here and would never remove the widget action
+    QToolBar::removeAction(iter->bar_action);
     m_entries.erase(iter);
 }
 
