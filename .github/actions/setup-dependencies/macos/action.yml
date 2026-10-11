@@ -12,33 +12,16 @@ runs:
   steps:
     - name: Install dependencies
       shell: bash
+      # no brew update: the image index is fresh enough, updating costs ~40s
+      # temurin 17 and the jdk toolchain come preinstalled, java_home finds them
+      # no mono: the vcpkg cache no longer uses the nuget backend
       run: |
-        brew update
-        brew install ninja extra-cmake-modules temurin@17 mono
+        brew install ninja extra-cmake-modules
 
     - name: Set JAVA_HOME
       shell: bash
       run: |
         echo "JAVA_HOME=$(/usr/libexec/java_home -v 17)" >> "$GITHUB_ENV"
-
-    - name: Setup vcpkg cache
-      shell: bash
-      env:
-        USERNAME: ${{ github.repository_owner }}
-        GITHUB_TOKEN: ${{ github.token }}
-        FEED_URL: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-      run: |
-        mono `vcpkg fetch nuget | tail -n 1` \
-          sources add \
-          -Source "$FEED_URL" \
-          -StorePasswordInClearText \
-          -Name GitHubPackages \
-          -UserName "$USERNAME" \
-          -Password "$GITHUB_TOKEN"
-        mono `vcpkg fetch nuget | tail -n 1` \
-          setapikey "$GITHUB_TOKEN" \
-          -Source "$FEED_URL"
-        echo "VCPKG_BINARY_SOURCES=clear;nuget,$FEED_URL,readwrite" >> "$GITHUB_ENV"
 
     - name: Setup vcpkg environment
       shell: bash
