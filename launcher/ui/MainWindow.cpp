@@ -111,7 +111,6 @@
 #include "ui/instanceview/InstanceView.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
-#include "ui/widgets/LabeledToolButton.h"
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
@@ -159,38 +158,38 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // instance toolbar stuff
     {
-        // Qt doesn't like vertical moving toolbars, so we have to force them...
-        // See https://github.com/PolyMC/PolyMC/issues/493
-        connect(ui->instanceToolBar, &QToolBar::orientationChanged, this,
-                [this](Qt::Orientation) { ui->instanceToolBar->setOrientation(Qt::Vertical); });
+        connect(ui->instanceToolBar, &QToolBar::orientationChanged, this, &MainWindow::updateInstanceToolBarOrientation);
+
+        // FIXME: why doesn't this work when done in the UI file?
+        ui->instanceToolBar->setMinimumWidth(140);
 
         // if you try to add a widget to a toolbar in a .ui file
         // qt designer will delete it when you save the file >:(
-        changeIconButton = new LabeledToolButton(this);
+        // HACK: the toolbar interferes with the sizing for some reason
+        auto* infoWidget = new QWidget(this);
+        auto* infoLayout = new QVBoxLayout(infoWidget);
+        infoLayout->setContentsMargins(2, 0, 2, 0);
+
+        changeIconButton = new QToolButton(infoWidget);
         changeIconButton->setObjectName(QStringLiteral("changeIconButton"));
-        changeIconButton->setIcon(QIcon::fromTheme("news"));
-        changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        changeIconButton->setIconSize({ 80, 80 });
+        changeIconButton->setAutoRaise(true);
+        updateInstanceToolIcon("default");
+        changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         connect(changeIconButton, &QToolButton::clicked, this, &MainWindow::on_actionChangeInstIcon_triggered);
-        ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, changeIconButton);
+        infoLayout->addWidget(changeIconButton);
 
-        renameButton = new LabeledToolButton(this);
-        renameButton->setObjectName(QStringLiteral("renameButton"));
-        renameButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        connect(renameButton, &QToolButton::clicked, this, &MainWindow::on_actionRenameInstance_triggered);
-        ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, renameButton);
+        nameLabel = new QLabel(infoWidget);
+        nameLabel->setObjectName(QStringLiteral("nameLabel"));
+        nameLabel->installEventFilter(this);
+        nameLabel->setAlignment(Qt::AlignCenter);
+        // QSizePolicy::Ignored allows the button to shrink or expand as necessary (ignoring the size hint)
+        nameLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+        nameLabel->setTextFormat(Qt::PlainText);
+        infoLayout->addWidget(nameLabel);
 
-        ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
-
-        // make every button stretch to the toolbar width, so the row stays aligned
-        // when the toolbar is moved or resized
-        for (QAction* action : ui->instanceToolBar->actions()) {
-            QWidget* widget = ui->instanceToolBar->widgetForAction(action);
-            if (!widget)
-                continue;
-            widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-            // workaround for breeze and breeze forks
-            widget->setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
-        }
+        instanceInfoWidget = ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, infoWidget);
+        Q_ASSERT(instanceInfoWidget != nullptr);
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -466,7 +465,6 @@ void MainWindow::retranslateUi()
     }
 
     changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
-    renameButton->setToolTip(ui->actionRenameInstance->toolTip());
 
     // replace the %1 with the launcher display name in some actions
     if (helpMenuButton->toolTip().contains("%1"))
@@ -801,6 +799,8 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* ev)
                     break;
             }
         }
+    } else if (obj == nameLabel && ev->type() == QEvent::Resize) {
+        updateNameLabel();
     }
     return QMainWindow::eventFilter(obj, ev);
 }
@@ -1244,9 +1244,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 void MainWindow::iconUpdated(QString icon)
 {
     if (icon == m_currentInstIcon) {
-        auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
-        ui->actionChangeInstIcon->setIcon(new_icon);
-        changeIconButton->setIcon(new_icon);
+        updateInstanceToolIcon(icon);
     }
 }
 
@@ -1707,7 +1705,8 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
-        renameButton->setText(m_selectedInstance->name());
+        updateNameLabel();
+        nameLabel->setToolTip(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
@@ -1749,8 +1748,9 @@ void MainWindow::selectionBad()
     ui->instanceToolBar->setEnabled(false);
     setInstanceActionsEnabled(false);
     updateLaunchButton();
-    renameButton->setText(tr("Rename Instance"));
-    updateInstanceToolIcon("grass");
+    updateNameLabel();
+    nameLabel->setToolTip(QString());
+    updateInstanceToolIcon("default");
 
     // ...and then see if we can enable the previously selected instance
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
@@ -1816,4 +1816,28 @@ void MainWindow::refreshCurrentInstance()
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);
+}
+
+void MainWindow::updateNameLabel()
+{
+    if (m_selectedInstance == nullptr) {
+        nameLabel->setText(QObject::tr("No Instance Selected"));
+    } else {
+        const auto metrics = nameLabel->fontMetrics();
+        nameLabel->setText(metrics.elidedText(m_selectedInstance->name(), Qt::ElideRight, nameLabel->width()));
+    }
+}
+
+void MainWindow::updateInstanceToolBarOrientation(Qt::Orientation orientation)
+{
+    ui->instanceToolBar->removeAction(ui->actionChangeInstIcon);
+
+    if (orientation == Qt::Vertical) {
+        instanceInfoWidget->setVisible(true);
+    } else {
+        instanceInfoWidget->setVisible(false);
+        ui->instanceToolBar->insertActionAfter(ui->actionRenameInstance, ui->actionChangeInstIcon);
+    }
+    // HACK: sync size (no, I don't know why this works)
+    ui->instanceToolBar->resize(0, 0);
 }
