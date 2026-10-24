@@ -101,6 +101,7 @@
 #include <QStringList>
 #include <QStringLiteral>
 #include <QStyleFactory>
+#include <QStyleHints>
 #include <QTranslator>
 #include <QWindow>
 #include <utility>
@@ -163,14 +164,7 @@
 #include <windows.h>
 #endif
 
-#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
-#include <QStyleHints>
-#endif
-
 #include "console/Console.h"
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
 
 static const QLatin1String g_liveCheckFile("live.check");
 
@@ -315,7 +309,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
     setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
     setDesktopFileName(BuildConfig.LAUNCHER_APPID);
-    m_startTime = QDateTime::currentDateTime();
 
     // Don't quit on hiding the last window
     Application::setQuitOnLastWindowClosed(false);
@@ -1276,16 +1269,24 @@ bool Application::createSetupWizard()
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
+        const bool darkMode = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
         // set default theme after going into theme wizard
         if (!validIcons) {
-            settings()->set("IconTheme", QString("pe_colored"));
+            QString defaultIconTheme;
+            if (QApplication::style()->name() == "breeze") {
+                defaultIconTheme = darkMode ? "breeze_dark" : "breeze_light";
+            } else {
+                defaultIconTheme = darkMode ? "flat_white" : "flat";
+            }
+
+            settings()->set("IconTheme", defaultIconTheme);
         }
         if (!validWidgets) {
-#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS)
-            const QString style =
-                QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark ? QStringLiteral("dark") : QStringLiteral("bright");
+#if defined(Q_OS_LINUX)
+            const QString style = "system";
 #else
-            const QString style = QStringLiteral("system");
+            const QString style = darkMode ? QStringLiteral("dark") : QStringLiteral("bright");
+
 #endif
 
             settings()->set("ApplicationTheme", style);
