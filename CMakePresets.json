@@ -88,6 +88,20 @@
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
             }
+        },
+        {
+            "name": "asan-tidy",
+            "displayName": "ASan+clang-tidy",
+            "inherits": [
+                "base"
+            ],
+            "cacheVariables": {
+                "DEBUG_ADDRESS_SANITIZER": "ON",
+                "USE_CLANG_TIDY": "ON"
+            },
+            "environment": {
+                "DEBUG_ADDRESS_SANITIZER": "1"
+            }
         }
     ],
     "buildPresets": [
@@ -146,6 +160,11 @@
                 "rhs": "Windows"
             },
             "configurePreset": "windows_msvc"
+        },
+        {
+            "name": "asan-tidy",
+            "displayName": "ASan+clang-tidy",
+            "configurePreset": "asan-tidy"
         }
     ],
     "testPresets": [
