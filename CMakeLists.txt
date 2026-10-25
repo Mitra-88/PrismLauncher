@@ -48,8 +48,7 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
         # /Gw helps reduce binary size
         # /Gy allows the compiler to package individual functions
         # /guard:cf enables control flow guard
-        # /Zc:inline removes unreferenced functions and data, helping reduce binary size
-        "$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/Gw;/Gy;/guard:cf;/Zc:inline>"
+        "$<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/Gw;/Gy;/guard:cf>"
 
         # /fp:fast uses faster, less strictly IEEE 754 compliant floating point math
         # /Ob3 enables more aggressive, cross-function inlining alongside /GL
@@ -90,7 +89,7 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
         set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
     endif()
 else()
-    add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-fstack-protector-strong;--param=ssp-buffer-size=4>")
+    add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-fstack-protector-strong>")
 
     # Hide all symbols that are not explicitly marked for export, shrinking binaries and speeding up load times
     add_compile_options(
