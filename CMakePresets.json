@@ -21,18 +21,6 @@
             }
         },
         {
-            "name": "windows_mingw",
-            "displayName": "Windows (MinGW)",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-        {
             "name": "windows_msvc",
             "displayName": "Windows (MSVC)",
             "inherits": [
@@ -60,16 +48,6 @@
         }
     ],
     "buildPresets": [
-        {
-            "name": "windows_mingw",
-            "displayName": "Windows (MinGW)",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "configurePreset": "windows_mingw"
-        },
         {
             "name": "windows_msvc",
             "displayName": "Windows (MSVC)",
@@ -102,19 +80,6 @@
                     "name": "^example64|example$"
                 }
             }
-        },
-        {
-            "name": "windows_mingw",
-            "displayName": "Windows (MinGW)",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "configurePreset": "windows_mingw"
         },
         {
             "name": "windows_msvc",
