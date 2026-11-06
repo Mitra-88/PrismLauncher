@@ -12,9 +12,6 @@ inputs:
   vcvars-arch:
     description: Visual Studio architecture to use
     required: false
-  qt-architecture:
-    description: Qt architecture
-    required: false
   qt-version:
     description: Version of Qt to use
     required: true
@@ -31,18 +28,7 @@ runs:
   using: composite
 
   steps:
-    - name: Setup Linux dependencies
-      if: ${{ runner.os == 'Linux' }}
-      uses: ./.github/actions/setup-dependencies/linux
-
-    - name: Setup macOS dependencies
-      if: ${{ runner.os == 'macOS' }}
-      uses: ./.github/actions/setup-dependencies/macos
-      with:
-        build-type: ${{ inputs.build-type }}
-
     - name: Setup Windows dependencies
-      if: ${{ runner.os == 'Windows' }}
       uses: ./.github/actions/setup-dependencies/windows
       with:
         build-type: ${{ inputs.build-type }}
@@ -69,7 +55,6 @@ runs:
       uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
       with:
         variant: sccache
-        create-symlink: ${{ runner.os != 'Windows' }}
         # unique save key per run plus a prefix fallback, so every build adds its
         # new objects to the cache instead of freezing on the first saved entry
         append-timestamp: true
@@ -87,38 +72,7 @@ runs:
     - name: Determine vcpkg triplet
       shell: bash
       run: |
-        declare vcpkg_arch vcpkg_platform
-
-        case "$RUNNER_ARCH" in
-        "X64")
-        	vcpkg_arch=x64
-        	;;
-        "ARM64")
-          vcpkg_arch=arm64
-          ;;
-        *)
-        	echo "# 🚨 The architecture \"$RUNNER_ARCH\" is not supported by vcpkg in CI!" >>"$GITHUB_STEP_SUMMARY"
-        	exit 1
-        	;;
-        esac
-
-        case "$RUNNER_OS" in
-        "Linux")
-        	vcpkg_platform=linux
-        	;;
-        "macOS")
-        	vcpkg_platform=osx
-        	;;
-        "Windows")
-        	vcpkg_platform=windows
-        	;;
-        *)
-        	echo "# 🚨 The platform \"$platform\" is not supported by vcpkg in CI!" >>"$GITHUB_STEP_SUMMARY"
-        	exit 1
-        	;;
-        esac
-
-        echo "VCPKG_TRIPLET=$vcpkg_arch-$vcpkg_platform" >> "$GITHUB_ENV"
+        echo "VCPKG_TRIPLET=x64-windows" >> "$GITHUB_ENV"
 
     # old python versions detect 7z files as zip, breaking aqtinstall. see https://github.com/miurahr/aqtinstall/issues/1042
     - name: Update Python

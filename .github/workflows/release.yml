@@ -43,10 +43,6 @@ jobs:
       - name: Package artifacts properly
         run: |
           mv ${{ github.workspace }}/PrismLauncher-source PrismLauncher-${{ env.VERSION }}
-          mv PrismLauncher-Linux-Qt6-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-          mv PrismLauncher-*.AppImage/PrismLauncher-*-x86_64.AppImage PrismLauncher-Linux-x86_64.AppImage
-          mv PrismLauncher-macOS*/PrismLauncher.zip PrismLauncher-macOS-${{ env.VERSION }}.zip
-          mv PrismLauncher-macOS*/PrismLauncher.dmg PrismLauncher-macOS-${{ env.VERSION }}.dmg
 
           tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
@@ -74,11 +70,7 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: true
           files: |
-            PrismLauncher-Linux-x86_64.AppImage
-            PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-macOS-${{ env.VERSION }}.zip
-            PrismLauncher-macOS-${{ env.VERSION }}.dmg
             PrismLauncher-${{ env.VERSION }}.tar.gz

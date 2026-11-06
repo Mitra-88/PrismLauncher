@@ -20,7 +20,7 @@ permissions: {}
 
 env:
   # Latest stable Qt release, used on every platform
-  QT_VERSION: 6.11.2
+  QT_VERSION: 6.12.0
   # Release-only builds; debug builds are no longer produced in CI
   BUILD_TYPE: Release
 
@@ -66,7 +66,6 @@ jobs:
 
           gh release delete nightly --yes --cleanup-tag || true
           gh release create nightly \
-            --prerelease \
             --target "$GITHUB_SHA" \
             --title "Nightly (build #${{ github.run_number }}, ${short_sha})" \
             --notes-file release-notes.md
@@ -81,36 +80,16 @@ jobs:
       # Required for Azure Trusted Signing
       id-token: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04
-            artifact-name: Linux
-            cmake-preset: linux
-
-          - os: windows-2022
-            artifact-name: Windows-MSVC
-            cmake-preset: windows_msvc
-            vcvars-arch: amd64
-
-          - os: macos-26
-            artifact-name: macOS
-            cmake-preset: macos_arm64
-            macosx-deployment-target: 13.0
-
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2022
 
     defaults:
       run:
         shell: bash
 
     env:
-      ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
+      ARTIFACT_NAME: Windows-MSVC-Qt6
       BUILD_PLATFORM: official
-      CMAKE_PRESET: ${{ matrix.cmake-preset }}
-
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
+      CMAKE_PRESET: windows_msvc
 
     steps:
       ##
@@ -127,8 +106,8 @@ jobs:
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: ${{ env.BUILD_TYPE }}
-          artifact-name: ${{ matrix.artifact-name }}
-          vcvars-arch: ${{ matrix.vcvars-arch }}
+          artifact-name: Windows-MSVC
+          vcvars-arch: amd64
           qt-version: ${{ env.QT_VERSION }}
 
       ##
@@ -157,43 +136,14 @@ jobs:
         run: |
           echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Package (Linux)
-        if: ${{ runner.os == 'Linux' }}
-        uses: ./.github/actions/package/linux
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ env.BUILD_TYPE }}
-          artifact-name: ${{ matrix.artifact-name }}
-          qt-version: ${{ env.QT_VERSION }}
-
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
-
-      - name: Package (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        uses: ./.github/actions/package/macos
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ env.BUILD_TYPE }}
-          artifact-name: ${{ matrix.artifact-name }}
-
-          apple-codesign-cert: ${{ secrets.APPLE_CODESIGN_CERT }}
-          apple-codesign-password: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
-          apple-codesign-id: ${{ secrets.APPLE_CODESIGN_ID }}
-          apple-notarize-apple-id: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
-          apple-notarize-team-id: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
-          apple-notarize-password: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
-          sparkle-ed25519-key: ${{ secrets.SPARKLE_ED25519_KEY }}
-
       - name: Package (Windows)
-        if: ${{ runner.os == 'Windows' }}
         uses: ./.github/actions/package/windows
         env:
           CI_HAS_ACCESS_TO_AZURE: ${{ vars.CI_HAS_ACCESS_TO_AZURE || '' }}
         with:
           version: ${{ steps.short-version.outputs.version }}
           build-type: ${{ env.BUILD_TYPE }}
-          artifact-name: ${{ matrix.artifact-name }}
+          artifact-name: Windows-MSVC
 
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -211,27 +161,9 @@ jobs:
           short_sha="${GITHUB_SHA::7}"
           mkdir -p nightly-assets
 
-          case "$RUNNER_OS" in
-            Linux)
-              mv PrismLauncher-Linux-*.AppImage "nightly-assets/PrismLauncher-Linux-${short_sha}-x86_64.AppImage"
-              mv PrismLauncher-portable.tar.gz "nightly-assets/PrismLauncher-Linux-Qt6-Portable-${short_sha}.tar.gz"
-              ;;
-            macOS)
-              cp PrismLauncher.zip "nightly-assets/PrismLauncher-macOS-${short_sha}.zip"
-              cp PrismLauncher.dmg "nightly-assets/PrismLauncher-macOS-${short_sha}.dmg"
-              ;;
-            Windows)
-              (cd install-portable && "/c/Program Files/7-Zip/7z.exe" a -tzip "../nightly-assets/PrismLauncher-Windows-MSVC-Portable-${short_sha}.zip" *)
-              cp PrismLauncher-Setup.exe "nightly-assets/PrismLauncher-Windows-MSVC-Setup-${short_sha}.exe"
-              ;;
-          esac
+          (cd install-portable && "/c/Program Files/7-Zip/7z.exe" a -tzip "../nightly-assets/PrismLauncher-Windows-MSVC-Portable-${short_sha}.zip" *)
+          cp PrismLauncher-Setup.exe "nightly-assets/PrismLauncher-Windows-MSVC-Setup-${short_sha}.exe"
 
           cd nightly-assets
-          # bash on macOS is 3.2, ${var,,} is not available there
-          os_name="$(printf '%s' "$RUNNER_OS" | tr '[:upper:]' '[:lower:]')"
-          if command -v sha256sum > /dev/null 2>&1; then
-            sha256sum -- * > "SHA256SUMS-$os_name.txt"
-          else
-            shasum -a 256 -- * > "SHA256SUMS-$os_name.txt"
-          fi
+          sha256sum -- * > "SHA256SUMS-windows.txt"
           gh release upload nightly --clobber --repo "$GITHUB_REPOSITORY" *
