@@ -40,7 +40,8 @@
             ],
             "cacheVariables": {
                 "DEBUG_ADDRESS_SANITIZER": "ON",
-                "USE_CLANG_TIDY": "ON"
+                "USE_CLANG_TIDY": "ON",
+                "Launcher_WARNING_AS_ERROR": "ON"
             },
             "environment": {
                 "DEBUG_ADDRESS_SANITIZER": "1"
